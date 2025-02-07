@@ -124,7 +124,19 @@ const Index = () => {
         if (!response.ok) {
           throw new Error("Failed to convert name");
         }
-        data = await response.json();
+        const rawData = await response.text();
+        try {
+          // Clean the response and parse it
+          const cleanedData = rawData
+            .trim()
+            .replace(/^```(?:json)?|```$/g, "")
+            .trim();
+          data = JSON.parse(cleanedData);
+        } catch (parseError) {
+          console.error("JSON parsing error:", parseError);
+          console.log("Raw response:", rawData);
+          throw new Error("Invalid response format");
+        }
       }
 
       setResult(data);

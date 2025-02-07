@@ -63,12 +63,17 @@ exports.handler = async (event, context) => {
     });
     console.log("Groq API response:", completion);
 
+    let responseContent = completion.choices[0].message.content;
+    // Clean the response from any markdown formatting
+    responseContent = responseContent.trim();
+    responseContent = responseContent.replace(/^```(?:json)?|```$/g, "").trim();
+
     return {
       statusCode: 200,
       headers: {
         "Content-Type": "application/json",
       },
-      body: completion.choices[0].message.content,
+      body: responseContent,
     };
   } catch (error) {
     console.error("Error in Groq API call:", error);

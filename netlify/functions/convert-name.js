@@ -68,6 +68,20 @@ exports.handler = async (event, context) => {
     responseContent = responseContent.trim();
     responseContent = responseContent.replace(/^```(?:json)?|```$/g, "").trim();
 
+    // Validate JSON before sending
+    try {
+      // Parse and stringify to ensure valid JSON
+      const parsed = JSON.parse(responseContent);
+      responseContent = JSON.stringify(parsed);
+    } catch (error) {
+      console.error("Invalid JSON from API:", error);
+      console.log("Raw response:", responseContent);
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: "Invalid response from AI service" }),
+      };
+    }
+
     return {
       statusCode: 200,
       headers: {

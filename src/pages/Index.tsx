@@ -126,16 +126,25 @@ const Index = () => {
         }
         const rawData = await response.text();
         try {
-          // Clean the response and parse it
+          // Clean and sanitize the response before parsing
           const cleanedData = rawData
             .trim()
             .replace(/^```(?:json)?|```$/g, "")
-            .trim();
+            .trim()
+            .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":') // Ensure property names are properly quoted
+            .replace(/\b(new|undefined|NaN)\b/g, '"$1"') // Quote JavaScript literals
+            .replace(/'/g, '"'); // Replace single quotes with double quotes
+
           data = JSON.parse(cleanedData);
+
+          // Validate the required fields
+          if (!data.final_name || !data.original_name) {
+            throw new Error("Invalid response structure");
+          }
         } catch (parseError) {
           console.error("JSON parsing error:", parseError);
           console.log("Raw response:", rawData);
-          throw new Error("Invalid response format");
+          throw new Error(`Invalid response format: ${parseError.message}`);
         }
       }
 

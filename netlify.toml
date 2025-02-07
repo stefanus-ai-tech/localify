@@ -9,6 +9,9 @@
 [functions]
   node_bundler = "esbuild"
 
+[dev]
+  functions = "netlify/functions"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"

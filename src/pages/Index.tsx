@@ -113,7 +113,7 @@ const Index = () => {
         rawResponse = rawResponse.replace(/```/g, "").trim();
         data = JSON.parse(rawResponse);
       } else {
-        const response = await fetch("/api/convert-name", {
+        const response = await fetch("/.netlify/functions/convert-name", {
           method: "POST",
           body: JSON.stringify({ name: name.trim(), culture }),
           headers: {

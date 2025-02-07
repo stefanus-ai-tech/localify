@@ -60,26 +60,44 @@ export const handler = async function (event, context) {
     try {
       const parsedResponse = JSON.parse(rawResponse);
 
-      // Validate required structure
+      // Sanitize all string values to ensure they're safe
+      const sanitizeString = (str) => {
+        if (typeof str !== "string") return "";
+        return str
+          .replace(/[\u0000-\u001F\u007F-\u009F]/g, "")
+          .replace(/"/g, '\\"')
+          .trim();
+      };
+
+      // Validate required structure with sanitized strings
       const validatedResponse = {
-        original_name: parsedResponse.original_name || name,
-        name_meaning: parsedResponse.name_meaning || "Unknown",
-        cultural_translation: parsedResponse.cultural_translation || "",
+        original_name: sanitizeString(parsedResponse.original_name || name),
+        name_meaning: sanitizeString(parsedResponse.name_meaning || "Unknown"),
+        cultural_translation: sanitizeString(
+          parsedResponse.cultural_translation || ""
+        ),
         final_name: {
-          native_script: parsedResponse.final_name?.native_script || "",
-          romanized: parsedResponse.final_name?.romanized || "",
-          pronunciation: parsedResponse.final_name?.pronunciation || "",
-          meaning_in_english:
-            parsedResponse.final_name?.meaning_in_english || "",
+          native_script: sanitizeString(
+            parsedResponse.final_name?.native_script || ""
+          ),
+          romanized: sanitizeString(parsedResponse.final_name?.romanized || ""),
+          pronunciation: sanitizeString(
+            parsedResponse.final_name?.pronunciation || ""
+          ),
+          meaning_in_english: sanitizeString(
+            parsedResponse.final_name?.meaning_in_english || ""
+          ),
         },
       };
+
+      const safeResponse = JSON.stringify(validatedResponse, null, 2);
 
       return {
         statusCode: 200,
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(validatedResponse),
+        body: safeResponse,
       };
     } catch (parseError) {
       console.error("Parse error:", parseError);

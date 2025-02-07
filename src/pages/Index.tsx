@@ -126,18 +126,35 @@ const Index = () => {
         }
         const rawData = await response.text();
         try {
-          // Clean and sanitize the response before parsing
+          // Clean and parse the response
           const cleanedData = rawData
             .trim()
+            // Remove any non-printable characters
+            .replace(/[\u0000-\u001F\u007F-\u009F]/g, "")
+            // Remove any markdown formatting
             .replace(/^```(?:json)?|```$/g, "")
-            .trim()
-            .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":') // Ensure property names are properly quoted
-            .replace(/\b(new|undefined|NaN)\b/g, '"$1"') // Quote JavaScript literals
-            .replace(/'/g, '"'); // Replace single quotes with double quotes
+            .trim();
 
-          data = JSON.parse(cleanedData);
+          try {
+            data = JSON.parse(cleanedData);
+          } catch (jsonError) {
+            console.error(
+              "Initial JSON parse failed, attempting to clean further"
+            );
+            // Additional cleaning if initial parse fails
+            const furtherCleanedData = cleanedData
+              .replace(/\n/g, " ")
+              .replace(/\r/g, "")
+              .replace(/\t/g, " ")
+              .replace(/\\"/g, '"')
+              .replace(/\\/g, "\\\\")
+              .replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3')
+              .replace(/'/g, '"');
 
-          // Validate the required fields
+            data = JSON.parse(furtherCleanedData);
+          }
+
+          // Validate the structure
           if (!data.final_name || !data.original_name) {
             throw new Error("Invalid response structure");
           }

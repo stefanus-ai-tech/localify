@@ -1,4 +1,3 @@
-
 const Groq = require("groq-sdk");
 
 exports.handler = async (event, context) => {
@@ -8,7 +7,7 @@ exports.handler = async (event, context) => {
 
   try {
     const { name, culture } = JSON.parse(event.body);
-    
+
     if (!name || !culture) {
       return {
         statusCode: 400,
@@ -17,7 +16,7 @@ exports.handler = async (event, context) => {
     }
 
     const groq = new Groq({
-      apiKey: process.env.GROQ_API_KEY,
+      apiKey: process.env.GROQ_API_KEY || process.env.LOCAL_GROQ_API_KEY,
     });
 
     const prompt = `
@@ -55,7 +54,7 @@ exports.handler = async (event, context) => {
 
     const completion = await groq.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
-      model: "mixtral-8x7b-32768",
+      model: "llama-3.3-70b-versatile",
       temperature: 0.5,
       max_tokens: 1024,
     });

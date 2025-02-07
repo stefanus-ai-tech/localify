@@ -1,14 +1,18 @@
-const { Groq } = require("groq-sdk");
+import Groq from "groq-sdk";
 
-exports.handler = async function (event, context) {
+export const handler = async function (event, context) {
   if (event.httpMethod !== "POST") {
     return {
       statusCode: 405,
-      body: "Method Not Allowed",
+      body: JSON.stringify({ error: "Method Not Allowed" }),
     };
   }
 
   try {
+    if (!process.env.GROQ_API_KEY) {
+      throw new Error("GROQ_API_KEY is not configured");
+    }
+
     const { name, culture } = JSON.parse(event.body);
     const groq = new Groq({
       apiKey: process.env.GROQ_API_KEY,
@@ -35,12 +39,17 @@ exports.handler = async function (event, context) {
       }
     `;
 
-    const completion = await groq.chat.completions.create({
-      messages: [{ role: "user", content: prompt }],
-      model: "llama-3.3-70b-versatile",
-      temperature: 0.5,
-      max_tokens: 1024,
-    });
+    const completion = await groq.chat.completions
+      .create({
+        messages: [{ role: "user", content: prompt }],
+        model: "llama-3.3-70b-versatile",
+        temperature: 0.5,
+        max_tokens: 1024,
+      })
+      .catch((error) => {
+        console.error("Groq API error:", error);
+        throw new Error(`Groq API error: ${error.message}`);
+      });
 
     let rawResponse = completion.choices[0].message.content.trim();
 
@@ -81,9 +90,13 @@ exports.handler = async function (event, context) {
     console.error("Function error:", error);
     return {
       statusCode: 500,
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
         error: "Failed to convert name",
-        message: error.message,
+        details: error.message,
+        stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
       }),
     };
   }

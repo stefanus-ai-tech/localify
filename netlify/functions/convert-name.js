@@ -7,12 +7,12 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const { name } = JSON.parse(event.body);
+    const { name, culture } = JSON.parse(event.body);
     
-    if (!name) {
+    if (!name || !culture) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: "Name is required" }),
+        body: JSON.stringify({ error: "Name and culture are required" }),
       };
     }
 
@@ -21,22 +21,34 @@ exports.handler = async (event, context) => {
     });
 
     const prompt = `
-      Given this name: "${name}", create a Japanese version following these steps:
-      1. Determine the meaning of the original name
-      2. Translate the meaning to Japanese
-      3. Create a new Japanese name that captures the essence
-      4. Provide the name in kanji, hiragana, and romaji
+      Given this name: "${name}" and target culture: "${culture}", create a culturally appropriate version following these steps:
+      1. Research the original name's meaning and etymology
+      2. Understand the cultural context and naming conventions of the target culture
+      3. Translate the meaning and essence into the target culture
+      4. Create a new name that captures the spirit of the original while respecting the target culture's traditions
+      
+      Cultural Guidelines:
+      - Japanese: Use kanji, hiragana, and romaji
+      - Chinese: Use simplified Chinese characters and pinyin
+      - Korean: Use hangul and romanization
+      - Arabic: Use Arabic script and romanization
+      - Russian: Use Cyrillic and romanization
+      - Greek: Use Greek alphabet and romanization
+      - Hindi: Use Devanagari and romanization
+      - Persian: Use Persian script and romanization
+      - Thai: Use Thai script and romanization
+      - Hebrew: Use Hebrew script and romanization
       
       Return only a JSON object in this format:
       {
         "original_name": "input name",
         "name_meaning": "meaning of original name",
-        "japanese_translation": "meaning in Japanese",
+        "cultural_translation": "meaning in target culture's language",
         "final_name": {
-          "romaji": "name in romaji",
-          "kanji": "name in kanji",
-          "hiragana": "name in hiragana",
-          "meaning_in_english": "meaning of the Japanese name"
+          "romanized": "name in roman alphabet",
+          "native_script": "name in target culture's script",
+          "pronunciation": "pronunciation guide",
+          "meaning_in_english": "meaning of the new name"
         }
       }
     `;

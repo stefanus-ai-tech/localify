@@ -37,7 +37,6 @@ const countries = [
   { value: "hebrew", label: "Hebrew" },
   { value: "elvish", label: "Elvish" },
   { value: "dragon", label: "Dragon" },
-  { value: "lotr", label: "Lord of the Rings" },
   { value: "dwarvish", label: "Dwarvish" },
   { value: "goblin", label: "Goblin" },
   { value: "high_elven", label: "High Elven" },
@@ -90,7 +89,6 @@ const Index = () => {
           - Hebrew: Use Hebrew script and romanization
           - Elvish: Use Tengwar or Cirth scripts and romanization, focus on Sindarin or Quenya styles
           - Dragon: Use dragon-like sounds and syllables, consider Draconic language influences
-          - Lord of the Rings: Consider names from Tolkien's works, Sindarin, Quenya, or Adûnaic
           - Dwarvish: Use Khuzdul or dwarven naming conventions, focus on strong, guttural sounds
           - Goblin: Use harsh, guttural sounds, short and sharp syllables
           - High Elven: Use Quenya-style names, focus on melodic and flowing sounds

@@ -20,20 +20,19 @@ exports.handler = async function (event, context) {
       2. Understand the cultural context and naming conventions of the target culture
       3. Translate the meaning and essence into the target culture
       4. Create a new name that captures the spirit of the original while respecting the target culture's traditions
-      
-      Cultural Guidelines:
-      - Japanese: Use kanji, hiragana, and romaji
-      - Chinese: Use simplified Chinese characters and pinyin
-      - Korean: Use hangul and romanization
-      - Arabic: Use Arabic script and romanization
-      - Russian: Use Cyrillic and romanization
-      - Greek: Use Greek alphabet and romanization
-      - Hindi: Use Devanagari and romanization
-      - Persian: Use Persian script and romanization
-      - Thai: Use Thai script and romanization
-      - Hebrew: Use Hebrew script and romanization
-      
-      Return only a JSON object without any extra text.
+
+      Return ONLY a JSON object in exactly this format, with no additional text or explanation:
+      {
+        "original_name": "input name",
+        "name_meaning": "meaning of original name",
+        "cultural_translation": "meaning in target culture's language",
+        "final_name": {
+          "native_script": "name in target culture's script",
+          "romanized": "name in roman alphabet",
+          "pronunciation": "pronunciation guide",
+          "meaning_in_english": "meaning of the new name"
+        }
+      }
     `;
 
     const completion = await groq.chat.completions.create({
@@ -43,21 +42,49 @@ exports.handler = async function (event, context) {
       max_tokens: 1024,
     });
 
-    const rawResponse = completion.choices[0].message.content.trim();
-    const cleanedResponse = rawResponse.replace(/```(?:json)?|```/g, "").trim();
+    let rawResponse = completion.choices[0].message.content.trim();
 
-    return {
-      statusCode: 200,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: cleanedResponse,
-    };
+    // Remove any markdown formatting
+    rawResponse = rawResponse.replace(/```json\n?|```/g, "").trim();
+
+    // Ensure the response is valid JSON
+    try {
+      const parsedResponse = JSON.parse(rawResponse);
+
+      // Validate required structure
+      const validatedResponse = {
+        original_name: parsedResponse.original_name || name,
+        name_meaning: parsedResponse.name_meaning || "Unknown",
+        cultural_translation: parsedResponse.cultural_translation || "",
+        final_name: {
+          native_script: parsedResponse.final_name?.native_script || "",
+          romanized: parsedResponse.final_name?.romanized || "",
+          pronunciation: parsedResponse.final_name?.pronunciation || "",
+          meaning_in_english:
+            parsedResponse.final_name?.meaning_in_english || "",
+        },
+      };
+
+      return {
+        statusCode: 200,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(validatedResponse),
+      };
+    } catch (parseError) {
+      console.error("Parse error:", parseError);
+      console.log("Raw response:", rawResponse);
+      throw new Error("Invalid JSON response from AI");
+    }
   } catch (error) {
     console.error("Function error:", error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Failed to convert name" }),
+      body: JSON.stringify({
+        error: "Failed to convert name",
+        message: error.message,
+      }),
     };
   }
 };

@@ -18,6 +18,7 @@ exports.handler = async (event, context) => {
     const groq = new Groq({
       apiKey: process.env.GROQ_API_KEY || process.env.LOCAL_GROQ_API_KEY,
     });
+    console.log("Groq instance created");
 
     const prompt = `
       Given this name: "${name}" and target culture: "${culture}", create a culturally appropriate version following these steps:
@@ -51,6 +52,7 @@ exports.handler = async (event, context) => {
         }
       }
     `;
+    console.log("Prompt to Groq API:", prompt);
 
     const completion = await groq.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
@@ -58,6 +60,7 @@ exports.handler = async (event, context) => {
       temperature: 0.5,
       max_tokens: 1024,
     });
+    console.log("Groq API response:", completion);
 
     return {
       statusCode: 200,
@@ -67,7 +70,7 @@ exports.handler = async (event, context) => {
       body: completion.choices[0].message.content,
     };
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error in Groq API call:", error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: "Failed to process request" }),

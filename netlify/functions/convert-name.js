@@ -16,6 +16,7 @@ exports.handler = async (event, context) => {
     }
 
     const groq = new Groq({
+      // Uses GROQ_API_KEY in production, falls back to VITE_LOCAL_GROQ_API_KEY in development
       apiKey: process.env.GROQ_API_KEY || process.env.LOCAL_GROQ_API_KEY,
     });
     console.log("Groq instance created");

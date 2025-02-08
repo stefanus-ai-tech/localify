@@ -40,3 +40,18 @@
 .read-the-docs {
   color: #888;
 }
+
+@media (max-width: 640px) {
+  .mobile-dropdown {
+    position: fixed;
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    max-height: 12.5rem !important;
+    margin-top: 0.5rem !important;
+    overflow-y: auto !important;
+    border-radius: 0 !important; /* Remove rounded corners */
+    border-top: 1px solid #ccc !important; /* Add a top border */
+  }
+}

@@ -205,7 +205,7 @@ const Index = () => {
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select culture" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="mobile-dropdown">
                 {countries.map((country) => (
                   <SelectItem key={country.value} value={country.value}>
                     {country.label}
